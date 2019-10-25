@@ -13,21 +13,22 @@ import (
 )
 
 var (
-	URL          string     = "https://www.pivotaltracker.com/services/v5/me"
-	FileLocation string     = homeDir() + "/.tracker"
+	url          string     = "https://www.pivotaltracker.com/services/v5/me"
+	fileLocation string     = homeDir() + "/.tracker"
 	currentUser  *user.User = user.New()
-	Stdout       *os.File   = os.Stdout
+	stdout       *os.File   = os.Stdout
 )
 
+// Me - does stuff
 func Me() {
 	setCredentials()
 	parse(makeRequest())
-	ioutil.WriteFile(FileLocation, []byte(currentUser.APIToken), 0644)
+	ioutil.WriteFile(fileLocation, []byte(currentUser.APIToken), 0644)
 }
 
 func makeRequest() []byte {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", URL, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	req.SetBasicAuth(currentUser.Username, currentUser.Password)
 	resp, err := client.Do(req)
 	body, err := ioutil.ReadAll(resp.Body)
@@ -39,7 +40,7 @@ func makeRequest() []byte {
 }
 
 func parse(body []byte) {
-	var meResp = new(MeResponse)
+	var meResp = new(meResponse)
 	err := json.Unmarshal(body, &meResp)
 	if err != nil {
 		fmt.Println("error:", err)
@@ -49,10 +50,10 @@ func parse(body []byte) {
 }
 
 func setCredentials() {
-	fmt.Fprint(Stdout, "Username: ")
+	fmt.Fprint(stdout, "Username: ")
 	var username = cmdutil.ReadLine()
 	cmdutil.Silence()
-	fmt.Fprint(Stdout, "Password: ")
+	fmt.Fprint(stdout, "Password: ")
 
 	var password = cmdutil.ReadLine()
 	currentUser.Login(username, password)
@@ -64,7 +65,7 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
-type MeResponse struct {
+type meResponse struct {
 	APIToken string `json:"api_token"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
