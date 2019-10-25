@@ -18,7 +18,7 @@ func main() {
 			Name:  "me",
 			Usage: "prints out Tracker's representation of your account",
 			Action: func(c *cli.Context) {
-				trackerapi.Me()
+				trackerapi.Me(os.Stdout)
 			},
 		},
 	}

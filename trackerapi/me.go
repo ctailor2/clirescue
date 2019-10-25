@@ -3,6 +3,7 @@ package trackerapi
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -20,8 +21,8 @@ var (
 )
 
 // Me - does stuff
-func Me() {
-	setCredentials()
+func Me(outputWriter io.Writer) {
+	setCredentials(outputWriter)
 	parse(makeRequest())
 	ioutil.WriteFile(fileLocation, []byte(currentUser.APIToken), 0644)
 }
@@ -49,11 +50,11 @@ func parse(body []byte) {
 	currentUser.APIToken = meResp.APIToken
 }
 
-func setCredentials() {
-	fmt.Fprint(stdout, "Username: ")
+func setCredentials(outputWriter io.Writer) {
+	fmt.Fprint(outputWriter, "Username: ")
 	var username = cmdutil.ReadLine()
 	cmdutil.Silence()
-	fmt.Fprint(stdout, "Password: ")
+	fmt.Fprint(outputWriter, "Password: ")
 
 	var password = cmdutil.ReadLine()
 	currentUser.Login(username, password)
