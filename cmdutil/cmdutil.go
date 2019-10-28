@@ -14,9 +14,8 @@ var (
 )
 
 // ReadLine - does stuff
-func ReadLine() string {
-	buf := buffer()
-	line, err := buf.ReadString('\n')
+func ReadLine(inputReader *bufio.Reader) string {
+	line, err := inputReader.ReadString('\n')
 	if err != nil {
 		fmt.Println(err)
 	}

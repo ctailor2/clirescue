@@ -1,6 +1,7 @@
 package trackerapi
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,21 +15,23 @@ import (
 )
 
 var (
-	url          string     = "https://www.pivotaltracker.com/services/v5/me"
-	fileLocation string     = homeDir() + "/.tracker"
-	currentUser  *user.User = user.New()
-	stdout       *os.File   = os.Stdout
+	currentUser *user.User = user.New()
+	stdout      *os.File   = os.Stdout
 )
 
 // Me - does stuff
-func Me(outputWriter io.Writer) {
-	setCredentials(outputWriter)
-	parse(makeRequest())
-	ioutil.WriteFile(fileLocation, []byte(currentUser.APIToken), 0644)
+func Me(
+	outputWriter io.Writer,
+	inputReader *bufio.Reader,
+	client *http.Client,
+	fileLocation string) {
+	setCredentials(outputWriter, inputReader)
+	const url = "https://www.pivotaltracker.com/services/v5/me"
+	parse(makeRequest(client, url))
+	ioutil.WriteFile(fileLocation+"/.tracker", []byte(currentUser.APIToken), 0644)
 }
 
-func makeRequest() []byte {
-	client := &http.Client{}
+func makeRequest(client *http.Client, url string) []byte {
 	req, err := http.NewRequest("GET", url, nil)
 	req.SetBasicAuth(currentUser.Username, currentUser.Password)
 	resp, err := client.Do(req)
@@ -50,13 +53,13 @@ func parse(body []byte) {
 	currentUser.APIToken = meResp.APIToken
 }
 
-func setCredentials(outputWriter io.Writer) {
+func setCredentials(outputWriter io.Writer, inputReader *bufio.Reader) {
 	fmt.Fprint(outputWriter, "Username: ")
-	var username = cmdutil.ReadLine()
+	var username = cmdutil.ReadLine(inputReader)
 	cmdutil.Silence()
 	fmt.Fprint(outputWriter, "Password: ")
 
-	var password = cmdutil.ReadLine()
+	var password = cmdutil.ReadLine(inputReader)
 	currentUser.Login(username, password)
 	cmdutil.Unsilence()
 }

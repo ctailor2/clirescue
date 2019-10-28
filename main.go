@@ -1,7 +1,10 @@
 package main
 
 import (
+	"net/http"
+	"bufio"
 	"os"
+	u "os/user"
 
 	"github.com/ctailor2/clirescue/trackerapi"
 	"github.com/urfave/cli"
@@ -18,7 +21,9 @@ func main() {
 			Name:  "me",
 			Usage: "prints out Tracker's representation of your account",
 			Action: func(c *cli.Context) {
-				trackerapi.Me(os.Stdout)
+				client := &http.Client{}
+				usr, _ := u.Current()
+				trackerapi.Me(os.Stdout, bufio.NewReader(os.Stdin), client, usr.HomeDir)
 			},
 		},
 	}
